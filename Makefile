@@ -1,5 +1,6 @@
 NAME     =      Matrix.exe
 
+
 CC       =      cc
 CFLAGS   =      -Wall -Wextra -Werror 
 DFLAGS   =      -g3
@@ -13,7 +14,8 @@ HEADER   =      $(HEADER_P)/$(HEADER_N)
 
 SRC_P =			./srcs
 SRC_N =			matrix_op.c \
-				matrix_create.c
+				matrix_create.c \
+				layer.c
 
 SRC_NAME   =      $(addprefix $(SRC_P)/, $(SRC_N))
 

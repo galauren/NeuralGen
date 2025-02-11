@@ -1,6 +1,5 @@
 #include "matrix.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include "layer.h"
 
 Matrix *Matrix_create(int rows, int cols)
 {
@@ -64,21 +63,62 @@ int Matrix_print(Matrix *m)
 	return (1);
 }
 
-void Matrix_randomize(Matrix *m)
+double	ore_no_sqrt(double x)
 {
-	int i = 0;
-	int j;
+    double	guess;
+    double	epsilon = 1e-10; // Précision de la convergence
 
-	while (i < m->rows)
+    if (x < 0)
+        return -1; // sqrt() d'un nombre négatif est une erreur
+
+    if (x == 0)
+        return 0; // sqrt(0) = 0
+
+    guess = x / 2.0; // Première estimation
+
+    while ((guess * guess - x) > epsilon || (x - guess * guess) > epsilon)
 	{
-		j = 0;
-		while (j < m->cols)
-		{
-			m->data[i][j] = (float)rand() / RAND_MAX * 2.0 - 1.0; // Valeurs entre -1 et 1
-			++j;
-		}
-		++i;
-	}
+        guess = (guess + x / guess) / 2.0;
+    }
+    return (guess);
+}
+
+void	Matrix_fill(Matrix *matrix, double input)
+{
+    for (int i = 0; i < matrix->rows; i++)
+    {
+        for (int j = 0; j < matrix->cols; j++)
+        {
+            matrix->data[i][j] = input;
+        }
+    }
+}
+
+void	Matrix_randomize(Matrix *matrix, InitMethod method, int input_size, int output_size)
+{
+    double limit;
+
+    if (method == XAVIER)
+    {
+        limit = ore_no_sqrt(6.0 / (input_size + output_size)); // Xavier
+    }
+    else if (method == HE)
+    {
+        limit = ore_no_sqrt(2.0 / input_size); // He
+    }
+    else
+    {
+        limit = 1.0; // Uniform (par défaut)
+    }
+
+    // Remplir la matrice avec des valeurs aléatoires selon la méthode choisie
+    for (int i = 0; i < matrix->rows; i++)
+    {
+        for (int j = 0; j < matrix->cols; j++)
+        {
+            matrix->data[i][j] = ((double)rand() / RAND_MAX) * 2 * limit - limit;
+        }
+    }
 }
 
 int	ft_atoi(char *nbr)
@@ -96,6 +136,33 @@ int	ft_atoi(char *nbr)
 	return (result);
 }
 
+int main(void)
+{
+    srand(time(NULL)); // Initialisation du générateur de nombres aléatoires
+
+    // Paramètres de la couche
+    int input_size = 3;
+    int output_size = 2;
+  
+
+    // Créer une couche
+    Layer *layer = Layer_init(input_size, output_size, XAVIER); // XAVIER HE ou UNIFORM
+    if (!layer)
+    {
+        fprintf(stderr, "Erreur lors de l'initialisation de la couche.\n");
+        return 1; // Si l'initialisation échoue
+    }
+
+    // Afficher les résultats
+    Layer_print(layer);
+
+    // Libérer la mémoire allouée
+    Layer_free(layer);
+
+    return 0;
+}
+
+/*
 int main(int ac, char **av)
 {
 	Matrix *tmp;
@@ -144,4 +211,4 @@ int main(int ac, char **av)
 	Matrix_free(mb);
 	Matrix_free(mc);
 	return (0);
-}
+}*/
